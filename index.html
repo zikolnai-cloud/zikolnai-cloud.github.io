@@ -1103,7 +1103,42 @@
                 width: 100%;
                 text-align: center;
             }
-        }
+       /* Mobile touch-friendly improvements */
+    .cta-btn {
+        padding: 1.2rem 3rem;
+        font-size: 1.1rem;
+    }
+
+    .social-btn {
+        padding: 1.2rem 2.5rem;
+        font-size: 1.1rem;
+    }
+
+    .admin-btn {
+        width: 70px;
+        height: 70px;
+    }
+
+    .filter-btn {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .hero-content h1 {
+        font-size: 3rem;
+    }
+
+    .section-header h2 {
+        font-size: 2.5rem;
+    }
+
+    .portfolio-item {
+        margin-bottom: 1.5rem;
+    }
+
+    .skill-item {
+        padding: 1.5rem;
+    } }
     </style>
 </head>
 <body>
@@ -1792,7 +1827,10 @@
         camera.position.z = 5;
 
         // Main Torus Knot
-        const geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
+        // Simplify geometry on mobile
+const geometry = isMobile 
+    ? new THREE.TorusKnotGeometry(1, 0.3, 50, 8)
+    : new THREE.TorusKnotGeometry(1, 0.3, 100, 16);
         const material = new THREE.MeshStandardMaterial({
             color: 0x00f5ff,
             wireframe: true,
@@ -1828,7 +1866,9 @@
 
         // Main Particle System
         const particlesGeometry = new THREE.BufferGeometry();
-        const particlesCount = 3000;
+        // Reduce particles on mobile for better performance
+const isMobile = window.innerWidth < 768;
+const particlesCount = isMobile ? 800 : 3000;
         const posArray = new Float32Array(particlesCount * 3);
         const colorArray = new Float32Array(particlesCount * 3);
         
@@ -1870,7 +1910,7 @@
 
         // Secondary Particle System - Smaller particles
         const particlesGeometry2 = new THREE.BufferGeometry();
-        const particlesCount2 = 1000;
+        const particlesCount2 = isMobile ? 300 : 1000;
         const posArray2 = new Float32Array(particlesCount2 * 3);
         
         for(let i = 0; i < particlesCount2 * 3; i++) {
@@ -2081,3 +2121,36 @@
     </script>
 </body>
 </html>
+// Mobile Performance Optimization
+if (isMobile) {
+    // Reduce animation frame rate on mobile
+    let lastFrame = Date.now();
+    const mobileFrameRate = 30; // 30 FPS instead of 60
+    const frameInterval = 1000 / mobileFrameRate;
+    
+    function mobileAnimate() {
+        requestAnimationFrame(mobileAnimate);
+        
+        const now = Date.now();
+        const elapsed = now - lastFrame;
+        
+        if (elapsed > frameInterval) {
+            lastFrame = now - (elapsed % frameInterval);
+            
+            torusKnot.rotation.x += 0.002;
+            torusKnot.rotation.y += 0.003;
+            octahedron.rotation.x += 0.003;
+            octahedron.rotation.y += 0.002;
+            icosahedron.rotation.x -= 0.002;
+            icosahedron.rotation.y -= 0.003;
+            particlesMesh.rotation.y += 0.0008;
+            particlesMesh.rotation.x += 0.0005;
+            particlesMesh2.rotation.y -= 0.0006;
+            particlesMesh2.rotation.x += 0.0004;
+            
+            renderer.render(scene, camera);
+        }
+    }
+    
+    mobileAnimate();
+}
